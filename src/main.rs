@@ -6,7 +6,6 @@ mod pref;
 mod dialog;
 
 use eframe::egui;
-use eframe::emath::Pos2;
 use egui::{Id, Vec2};
 use egui_extras::{TableBody, TableBuilder, Size};
 
@@ -23,7 +22,9 @@ fn main() {
     let folder_maps = maps::get_maps(prefs.custom_path());
     let app = MapLoaderApp::with_pref_and_maps(prefs, folder_maps);
 
-    let icon = image::open("media\\icon-128.png").expect("Failed to open icon path").to_rgba8();
+    //Include the icon directly into the binary
+    let icon_bytes = include_bytes!("..\\media\\icon-128.png");
+    let icon = image::load_from_memory(icon_bytes).expect("Failed to load icon data").to_rgba8();
     let (icon_width, icon_height) = icon.dimensions();
 
     let options = eframe::NativeOptions {
