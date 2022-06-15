@@ -1,0 +1,15 @@
+[package]
+name = "rocket_league_map_loader"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egui = "0.18.1"
+egui_extras = "0.18.0"
+eframe = { version = "0.18.0", features = ["persistence"] }
+image = "0.24.2"
+preferences = "1.1.0"
+rfd = "0.8.2"
+serde_json = "1.0"
