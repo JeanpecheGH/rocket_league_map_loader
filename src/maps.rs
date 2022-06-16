@@ -27,7 +27,9 @@ pub fn get_maps(path: &str) -> Vec<Map> {
         let dir_name = dir_path.to_str().unwrap();
         let md = fs::metadata(dir_name).unwrap();
         if md.is_dir() {
-            maps.push(get_map(dir_name).unwrap());
+            //https://rust-unofficial.github.io/patterns/idioms/option-iter.html
+            //Extend can iterate over an option
+            maps.extend(get_map(dir_name));
         }
     }
     maps
