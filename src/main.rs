@@ -19,8 +19,7 @@ const VEC2_SIZE: Vec2 = Vec2 { x: WIDTH, y: HEIGHT};
 
 fn main() {
     let prefs: Pref = pref::load_pref();
-    let folder_maps = maps::get_maps(prefs.custom_path());
-    let app = MapLoaderApp::with_pref_and_maps(prefs, folder_maps);
+    let app = MapLoaderApp::with_pref(prefs);
 
     //Include the icon directly into the binary
     let icon_bytes = include_bytes!("..\\media\\icon-128.png");
@@ -158,11 +157,11 @@ impl MapLoaderApp {
         }
     }
 
-    fn with_pref_and_maps(pref: Pref, maps: Vec<Map>) -> Self {
+    fn with_pref(pref: Pref) -> Self {
         Self {
             pref: pref,
             search: String::from(""),
-            maps: maps,
+            maps: Vec::new(),
             dialog: Dialog::default()
         }
     }
@@ -204,9 +203,13 @@ impl eframe::App for MapLoaderApp {
                     }
                 });
             } else {
-            ////////////////////
-            //// Main Panel ////
-            ////////////////////
+                //Only load maps now that we have set the custom path
+                let folder_maps = maps::get_maps(self.pref.custom_path());
+                self.maps = folder_maps;
+
+                ////////////////////
+                //// Main Panel ////
+                ////////////////////
                 ui.horizontal(|ui| {
                     ui.menu_button("☰", |ui| Self::nested_menus(self, ui));
                     ui.with_layout(egui::Layout::right_to_left(), |ui| {
