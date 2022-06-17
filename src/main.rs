@@ -140,12 +140,12 @@ impl MapLoaderApp {
                             let r = manage_maps::load_custom_file(self.pref.game_path(), &m.path);
                             match r {
                                 Ok(()) => {
-                                    self.dialog.title = String::from("Loading");
-                                    let msg = format!("\"{}\" loaded successfully", m.name);
+                                    self.dialog.title = String::from("✅ Success");
+                                    let msg = format!("\"{}\" successfully loaded", m.name);
                                     self.dialog.msg = String::from(msg);
                                 }
                                 Err(e) => {
-                                    self.dialog.title = String::from("Error while loading custom map");
+                                    self.dialog.title = String::from("⚠ Error");
                                     self.dialog.msg = e.to_string();
                                 }
                             }
@@ -189,10 +189,10 @@ impl eframe::App for MapLoaderApp {
                         }
                     });
             }
-            else if self.pref.game_path().is_empty() {
+            else if self.pref.game_path().is_empty() || !manage_maps::original_file_exists(&self.pref.game_path()) {
                 ui.vertical_centered(|ui| {
                     ui.label("");
-                    ui.label("The game path is not defined");
+                    ui.label("The game path is not defined or is not set to the game folder");
                     ui.label("");
                     ui.label("Please select the folder where your game in installed");
                     ui.label("");
@@ -219,11 +219,11 @@ impl eframe::App for MapLoaderApp {
                             let r = manage_maps::restore_original_file(self.pref.game_path());
                             match r {
                                 Ok(()) => {
-                                    self.dialog.title = String::from("Restoring original map");
-                                    self.dialog.msg = String::from("Original map restored sucessfully");
+                                    self.dialog.title = String::from("✅ Success");
+                                    self.dialog.msg = String::from("Original map sucessfully restored");
                                 }
                                 Err(e) => {
-                                    self.dialog.title = String::from("Error while restoring");
+                                    self.dialog.title = String::from("⚠ Error");
                                     self.dialog.msg = e.to_string();
                                 }
                             }

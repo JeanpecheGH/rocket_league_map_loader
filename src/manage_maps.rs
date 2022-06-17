@@ -45,7 +45,7 @@ fn copy_file(from: &str, to: &str) -> Result<(), io::Error> {
     }
 }
 
-fn original_file_exists(game_folder: &str) -> bool {
+pub fn original_file_exists(game_folder: &str) -> bool {
     let file_path = format!("{}{}\\{}", game_folder, GAME_MAP_FOLDER, ORIGINAL_FILE);
     Path::new(&file_path).is_file()
 }
@@ -53,8 +53,4 @@ fn original_file_exists(game_folder: &str) -> bool {
 fn backup_file_exists(game_folder: &str) -> bool {
     let file_path = format!("{}{}\\{}", game_folder, GAME_MAP_FOLDER, BACKUP_FILE);
     Path::new(&file_path).is_file()
-}
-
-fn file_exists(file_path: &str) -> bool {
-    Path::new(file_path).is_file()
 }
