@@ -16,6 +16,8 @@ use crate::dialog::Dialog;
 const WIDTH: f32 = 700.0;
 const HEIGHT: f32 = 500.0;
 const VEC2_SIZE: Vec2 = Vec2 { x: WIDTH, y: HEIGHT};
+const TITLE_SUCCESS: &str = "✅ Success";
+const TITLE_ERROR: &str = "⚠ Error";
 
 fn main() {
     let prefs: Pref = pref::load_pref();
@@ -140,12 +142,12 @@ impl MapLoaderApp {
                             let r = manage_maps::load_custom_file(self.pref.game_path(), &m.path);
                             match r {
                                 Ok(()) => {
-                                    self.dialog.title = String::from("✅ Success");
+                                    self.dialog.title = String::from(TITLE_SUCCESS);
                                     let msg = format!("\"{}\" successfully loaded", m.name);
                                     self.dialog.msg = String::from(msg);
                                 }
                                 Err(e) => {
-                                    self.dialog.title = String::from("⚠ Error");
+                                    self.dialog.title = String::from(TITLE_ERROR);
                                     self.dialog.msg = e.to_string();
                                 }
                             }
@@ -219,11 +221,11 @@ impl eframe::App for MapLoaderApp {
                             let r = manage_maps::restore_original_file(self.pref.game_path());
                             match r {
                                 Ok(()) => {
-                                    self.dialog.title = String::from("✅ Success");
+                                    self.dialog.title = String::from(TITLE_SUCCESS);
                                     self.dialog.msg = String::from("Original map sucessfully restored");
                                 }
                                 Err(e) => {
-                                    self.dialog.title = String::from("⚠ Error");
+                                    self.dialog.title = String::from(TITLE_ERROR);
                                     self.dialog.msg = e.to_string();
                                 }
                             }
