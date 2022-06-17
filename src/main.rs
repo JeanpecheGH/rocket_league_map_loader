@@ -113,7 +113,7 @@ impl MapLoaderApp {
     fn populate_table(&mut self, body: &mut TableBody) {
         let maps = &self.maps;
         let search = &self.search;
-        body.row(15.0, |mut row|{
+        body.row(5.0, |mut row|{
             row.col(|ui| {
                 ui.separator();
             });
@@ -132,27 +132,33 @@ impl MapLoaderApp {
                 || author.to_lowercase().contains(lower_search.as_str()) {
                 body.row(30.0, |mut row| {
                     row.col(|ui| {
-                        ui.label(&m.name);
+                        ui.horizontal_centered(|ui| {
+                            ui.label(&m.name);
+                        });
                     });
                     row.col(|ui| {
-                        ui.label(author);
+                        ui.horizontal_centered(|ui| {
+                            ui.label(author);
+                        });
                     });
                     row.col(|ui| {
-                        if ui.button("LOAD").clicked() {
-                            let r = manage_maps::load_custom_file(self.pref.game_path(), &m.path);
-                            match r {
-                                Ok(()) => {
-                                    self.dialog.title = String::from(TITLE_SUCCESS);
-                                    let msg = format!("\"{}\" successfully loaded", m.name);
-                                    self.dialog.msg = String::from(msg);
+                        ui.horizontal_centered(|ui| {
+                            if ui.button("LOAD").clicked() {
+                                let r = manage_maps::load_custom_file(self.pref.game_path(), &m.path);
+                                match r {
+                                    Ok(()) => {
+                                        self.dialog.title = String::from(TITLE_SUCCESS);
+                                        let msg = format!("\"{}\" successfully loaded", m.name);
+                                        self.dialog.msg = String::from(msg);
+                                    }
+                                    Err(e) => {
+                                        self.dialog.title = String::from(TITLE_ERROR);
+                                        self.dialog.msg = e.to_string();
+                                    }
                                 }
-                                Err(e) => {
-                                    self.dialog.title = String::from(TITLE_ERROR);
-                                    self.dialog.msg = e.to_string();
-                                }
-                            }
-                            self.dialog.show = true;
-                        };
+                                self.dialog.show = true;
+                            };
+                        });
                     });
                 });
             };
@@ -235,6 +241,7 @@ impl eframe::App for MapLoaderApp {
                 });
             ui.separator();
             TableBuilder::new(ui)
+                .striped(true)
                 .column(Size::remainder().at_least(100.0))
                 .column(Size::relative(0.35).at_least(100.0))
                 .column(Size::exact(60.0))
