@@ -220,6 +220,7 @@ impl eframe::App for MapLoaderApp {
                 ////////////////////
                 ui.horizontal(|ui| {
                     ui.menu_button("☰", |ui| Self::nested_menus(self, ui));
+                    egui::widgets::global_dark_light_mode_switch(ui);
                     ui.with_layout(egui::Layout::right_to_left(), |ui| {
                         ui.add_sized(Vec2::new(100.0, ui.available_height()), egui::TextEdit::singleline(&mut self.search));
                         ui.label("Search: ");
