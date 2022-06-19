@@ -83,8 +83,8 @@ impl MapLoaderApp {
         let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
         if let Some(path) = rfd::FileDialog::new().set_directory(&path).pick_folder() {
             let custom_path = path.display().to_string();
-            println!("Custom map folder replace {} with {}", self.pref.custom_path(), custom_path);
-            self.pref = Pref::with_paths(custom_path, self.pref.game_path().to_string());
+            println!("Custom map folder replace {} with {}", self.pref.custom_path, custom_path);
+            self.pref.custom_path = custom_path;
             pref::save_pref(&self.pref);
         }
     }
@@ -93,9 +93,35 @@ impl MapLoaderApp {
         let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
         if let Some(path) = rfd::FileDialog::new().set_directory(&path).pick_folder() {
             let game_path = path.display().to_string();
-            println!("Game folder replace {} with {}", self.pref.game_path(), game_path);
-            self.pref = Pref::with_paths(self.pref.custom_path().to_string(),game_path );
+            println!("Game folder replace {} with {}", self.pref.game_path, game_path);
+            self.pref.game_path = game_path;
             pref::save_pref(&self.pref);
+        }
+    }
+
+    fn pick_theme(&mut self, ui: &mut egui::Ui) {
+        let style = (*ui.ctx().style()).clone();
+        match style.visuals.dark_mode {
+            true => {
+                if ui.add(egui::Button::new("☀").frame(false))
+                    .on_hover_text("Switch to light mode")
+                    .clicked()
+                {
+                    ui.ctx().set_visuals(egui::Visuals::light());
+                    self.pref.dark_mode = false;
+                    pref::save_pref(&self.pref);
+                }
+            }
+            false => {
+                if ui.add(egui::Button::new("🌙").frame(false))
+                    .on_hover_text("Switch to dark mode")
+                    .clicked()
+                {
+                    ui.ctx().set_visuals(egui::Visuals::dark());
+                    self.pref.dark_mode = true;
+                    pref::save_pref(&self.pref);
+                }
+            }
         }
     }
 
@@ -144,7 +170,7 @@ impl MapLoaderApp {
                     row.col(|ui| {
                         ui.horizontal_centered(|ui| {
                             if ui.button("LOAD").clicked() {
-                                let r = manage_maps::load_custom_file(self.pref.game_path(), &m.path);
+                                let r = manage_maps::load_custom_file(&self.pref.game_path, &m.path);
                                 match r {
                                     Ok(()) => {
                                         self.dialog.title = String::from(TITLE_SUCCESS);
@@ -181,11 +207,19 @@ impl eframe::App for MapLoaderApp {
         //Dialog test
         self.render_dialog(ctx);
 
+        //Set theme based on preferences
+        let pref_dark_mode = self.pref.dark_mode;
+        match pref_dark_mode {
+            true => ctx.set_visuals(egui::Visuals::dark()),
+            false => ctx.set_visuals(egui::Visuals::light())
+        }
+
+
         egui::CentralPanel::default().show(ctx, |ui| {
             //When showing a dialog, the whole UI underneath is disabled
             ui.set_enabled(!self.dialog.show);
 
-            if self.pref.custom_path().is_empty() {
+            if self.pref.custom_path.is_empty() {
                     ui.vertical_centered(|ui| {
                         ui.label("");
                         ui.label("The custom maps path is not defined");
@@ -197,7 +231,7 @@ impl eframe::App for MapLoaderApp {
                         }
                     });
             }
-            else if self.pref.game_path().is_empty() || !manage_maps::original_file_exists(&self.pref.game_path()) {
+            else if self.pref.game_path.is_empty() || !manage_maps::original_file_exists(&self.pref.game_path) {
                 ui.vertical_centered(|ui| {
                     ui.label("");
                     ui.label("The game path is not defined or is not set to the game folder");
@@ -212,7 +246,7 @@ impl eframe::App for MapLoaderApp {
                 });
             } else {
                 //Only load maps now that we have set the custom path
-                let folder_maps = maps::get_maps(self.pref.custom_path());
+                let folder_maps = maps::get_maps(&self.pref.custom_path);
                 self.maps = folder_maps;
 
                 ////////////////////
@@ -220,12 +254,12 @@ impl eframe::App for MapLoaderApp {
                 ////////////////////
                 ui.horizontal(|ui| {
                     ui.menu_button("☰", |ui| Self::nested_menus(self, ui));
-                    egui::widgets::global_dark_light_mode_switch(ui);
+                    Self::pick_theme(self, ui);
                     ui.with_layout(egui::Layout::right_to_left(), |ui| {
                         ui.add_sized(Vec2::new(100.0, ui.available_height()), egui::TextEdit::singleline(&mut self.search));
                         ui.label("Search: ");
                         if ui.button("Restore original map").clicked() {
-                            let r = manage_maps::restore_original_file(self.pref.game_path());
+                            let r = manage_maps::restore_original_file(&self.pref.game_path);
                             match r {
                                 Ok(()) => {
                                     self.dialog.title = String::from(TITLE_SUCCESS);
