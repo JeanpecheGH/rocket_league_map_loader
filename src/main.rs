@@ -139,6 +139,7 @@ impl MapLoaderApp {
     fn populate_table(&mut self, body: &mut TableBody) {
         let maps = &self.maps;
         let search = &self.search;
+        let last_loaded_map = self.pref.last_loaded_map.clone();
         body.row(5.0, |mut row|{
             row.col(|ui| {
                 ui.separator();
@@ -169,21 +170,27 @@ impl MapLoaderApp {
                     });
                     row.col(|ui| {
                         ui.horizontal_centered(|ui| {
-                            if ui.button("LOAD").clicked() {
-                                let r = manage_maps::load_custom_file(&self.pref.game_path, &m.path);
-                                match r {
-                                    Ok(()) => {
-                                        self.dialog.title = String::from(TITLE_SUCCESS);
-                                        let msg = format!("\"{}\" successfully loaded", m.name);
-                                        self.dialog.msg = String::from(msg);
+                            if m.name.eq(last_loaded_map.as_str()) {
+                                ui.label(egui::RichText::new("LOADED").strong());
+                            } else {
+                                if ui.button("LOAD").clicked() {
+                                    let r = manage_maps::load_custom_file(&self.pref.game_path, &m.path);
+                                    match r {
+                                        Ok(()) => {
+                                            self.dialog.title = String::from(TITLE_SUCCESS);
+                                            let msg = format!("\"{}\" successfully loaded", m.name);
+                                            self.dialog.msg = String::from(msg);
+                                            self.pref.last_loaded_map = m.name.clone();
+                                            pref::save_pref(&self.pref);
+                                        }
+                                        Err(e) => {
+                                            self.dialog.title = String::from(TITLE_ERROR);
+                                            self.dialog.msg = e.to_string();
+                                        }
                                     }
-                                    Err(e) => {
-                                        self.dialog.title = String::from(TITLE_ERROR);
-                                        self.dialog.msg = e.to_string();
-                                    }
-                                }
-                                self.dialog.show = true;
-                            };
+                                    self.dialog.show = true;
+                                };
+                            }
                         });
                     });
                 });
@@ -258,19 +265,23 @@ impl eframe::App for MapLoaderApp {
                     ui.with_layout(egui::Layout::right_to_left(), |ui| {
                         ui.add_sized(Vec2::new(100.0, ui.available_height()), egui::TextEdit::singleline(&mut self.search));
                         ui.label("Search: ");
-                        if ui.button("Restore original map").clicked() {
-                            let r = manage_maps::restore_original_file(&self.pref.game_path);
-                            match r {
-                                Ok(()) => {
-                                    self.dialog.title = String::from(TITLE_SUCCESS);
-                                    self.dialog.msg = String::from("Original map sucessfully restored");
+                        if !self.pref.last_loaded_map.eq("") {
+                            if ui.button("Restore original map").clicked() {
+                                let r = manage_maps::restore_original_file(&self.pref.game_path);
+                                match r {
+                                    Ok(()) => {
+                                        self.dialog.title = String::from(TITLE_SUCCESS);
+                                        self.dialog.msg = String::from("Original map sucessfully restored");
+                                        self.pref.last_loaded_map = String::from("");
+                                        pref::save_pref(&self.pref);
+                                    }
+                                    Err(e) => {
+                                        self.dialog.title = String::from(TITLE_ERROR);
+                                        self.dialog.msg = e.to_string();
+                                    }
                                 }
-                                Err(e) => {
-                                    self.dialog.title = String::from(TITLE_ERROR);
-                                    self.dialog.msg = e.to_string();
-                                }
+                                self.dialog.show = true;
                             }
-                            self.dialog.show = true;
                         }
                     });
                 });
