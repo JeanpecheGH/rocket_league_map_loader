@@ -12,6 +12,7 @@ use egui_extras::{TableBody, TableBuilder, Size};
 use crate::maps::Map;
 use crate::pref::Pref;
 use crate::dialog::Dialog;
+use crate::manage_maps::unzip;
 
 const WIDTH: f32 = 700.0;
 const HEIGHT: f32 = 500.0;
@@ -99,6 +100,31 @@ impl MapLoaderApp {
         }
     }
 
+    fn import_new_map(&mut self) {
+        let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
+        let extensions: Vec<&str> = vec!("zip");
+        if let Some(path) = rfd::FileDialog::new().set_directory(&path).add_filter("Zip files", &extensions).pick_file() {
+            unzip(path.as_path(), &self.pref.custom_path);
+            let zip_path = path.display().to_string();
+            println!("Chosen zip file : {}", zip_path);
+        }
+    }
+
+    fn nested_menus(&mut self, ui: &mut egui::Ui) {
+        if ui.button("Set custom maps folder").clicked() {
+            self.pick_custom_folder();
+            ui.close_menu();
+        }
+        if ui.button("Set game folder").clicked() {
+            self.pick_game_folder();
+            ui.close_menu();
+        }
+        if ui.button("Import new map").clicked() {
+            self.import_new_map();
+            ui.close_menu();
+        }
+    }
+
     fn pick_theme(&mut self, ui: &mut egui::Ui) {
         let style = (*ui.ctx().style()).clone();
         match style.visuals.dark_mode {
@@ -122,17 +148,6 @@ impl MapLoaderApp {
                     pref::save_pref(&self.pref);
                 }
             }
-        }
-    }
-
-    fn nested_menus(&mut self, ui: &mut egui::Ui) {
-        if ui.button("Set custom maps folder").clicked() {
-            self.pick_custom_folder();
-            ui.close_menu();
-        }
-        if ui.button("Set game folder").clicked() {
-            self.pick_game_folder();
-            ui.close_menu();
         }
     }
 
