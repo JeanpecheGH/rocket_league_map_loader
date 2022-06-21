@@ -18,21 +18,20 @@ impl Default for Map {
     }
 }
 
-pub fn get_maps(path: &str) -> Vec<Map> {
-    let paths = fs::read_dir(path).unwrap();
+pub fn get_maps(path: &str) -> Option<Vec<Map>> {
     let mut maps = vec![];
 
-    for entry in paths {
-        let dir_path = entry.unwrap().path();
-        let dir_name = dir_path.to_str().unwrap();
-        let md = fs::metadata(dir_name).unwrap();
+    for entry in fs::read_dir(path).ok()? {
+        let dir_path = entry.ok()?.path();
+        let dir_name = dir_path.to_str()?;
+        let md = fs::metadata(dir_name).ok()?;
         if md.is_dir() {
             //https://rust-unofficial.github.io/patterns/idioms/option-iter.html
             //Extend can iterate over an option
             maps.extend(get_map(dir_name));
         }
     }
-    maps
+    Some(maps)
 }
 
 fn get_map(path: &str) -> Option<Map> {
@@ -44,9 +43,9 @@ fn get_map(path: &str) -> Option<Map> {
     let opt_name: Option<String> = split.last().map(|s| s.to_string());
 
     for entry in fs::read_dir(path).ok()? {
-        let file_path = entry.unwrap().path();
-        let file_name = file_path.to_str().unwrap();
-        let md = fs::metadata(file_name).unwrap();
+        let file_path = entry.ok()?.path();
+        let file_name = file_path.to_str()?;
+        let md = fs::metadata(file_name).ok()?;
         if md.is_file() {
             match file_name {
                 f if f.ends_with(".udk") => opt_path = Some(file_name.to_string()),
@@ -64,8 +63,7 @@ fn get_map(path: &str) -> Option<Map> {
 }
 
 fn parse_json(path: &str) -> Option<String> {
-    let file = fs::read_to_string(path);
-    let data = file.ok()?;
+    let data = fs::read_to_string(path).ok()?;
     let v: Value = serde_json::from_str(&data).ok()?;
     // Access parts of the data by indexing with square brackets.
     let author = v["author"].as_str().map(|s| String::from(s));

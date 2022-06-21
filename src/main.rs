@@ -268,7 +268,7 @@ impl eframe::App for MapLoaderApp {
                 });
             } else {
                 //Only load maps now that we have set the custom path
-                let folder_maps = maps::get_maps(&self.pref.custom_path);
+                let folder_maps = maps::get_maps(&self.pref.custom_path).unwrap_or(vec![]);
                 self.maps = folder_maps;
 
                 ////////////////////
