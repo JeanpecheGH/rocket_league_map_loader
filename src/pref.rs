@@ -11,15 +11,16 @@ pub struct Pref {
     pub dark_mode: bool
 }
 
-pub fn load_pref() -> Pref {
-    let mut load_pref = PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY);
-    if load_pref.is_err() {
-        println!("Unable to load existing preferences, initialize preferences");
-        save_pref(&Pref::default());
-        load_pref = PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY);
-    }
-    let pref_map = load_pref.unwrap();
-    Pref {
+pub fn load_pref() -> Result<Pref, preferences::PreferencesError>  {
+    let pref_map = match PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY) {
+        Ok(pref_map) => pref_map,
+        Err(e) => {
+            println!("Unable to load existing preferences, initialize preferences : {}", e);
+            save_pref(&Pref::default())?;
+            PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY)?
+        }
+    };
+    Ok(Pref {
         custom_path:  pref_map.get("custom_path").map(|s| &s[..]).unwrap_or("").to_string(),
         game_path: pref_map.get("game_path").map(|s| &s[..]).unwrap_or("").to_string(),
         last_loaded_map: pref_map.get("last_loaded_map").map(|s| &s[..]).unwrap_or("").to_string(),
@@ -28,16 +29,17 @@ pub fn load_pref() -> Pref {
             "false" => false,
             _ => false
         } ).unwrap_or(false)
-    }
+    })
 }
 
-pub fn save_pref(prefs: &Pref) -> () {
+pub fn save_pref(prefs: &Pref) -> Result<(), preferences::PreferencesError> {
     let mut pref_map: PreferencesMap<String> = PreferencesMap::new();
     pref_map.insert("custom_path".into(), prefs.custom_path.clone());
     pref_map.insert("game_path".into(), prefs.game_path.clone());
     pref_map.insert("last_loaded_map".into(), prefs.last_loaded_map.clone());
     pref_map.insert("dark_mode".into(), prefs.dark_mode.to_string());
-    pref_map.save(&APP_INFO, PREFS_KEY).expect("Could not store preferences");
+    pref_map.save(&APP_INFO, PREFS_KEY)?;
+    Ok(())
 }
 
 impl Default for Pref {

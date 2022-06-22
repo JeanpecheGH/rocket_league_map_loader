@@ -21,7 +21,14 @@ const TITLE_SUCCESS: &str = "✅ Success";
 const TITLE_ERROR: &str = "⚠ Error";
 
 fn main() {
-    let prefs: Pref = pref::load_pref();
+    let r = pref::load_pref();
+    let prefs = match r {
+        Ok(pref) => pref,
+        Err(e) => {
+            eprintln!("Error loading preferences : {}", e);
+            Pref::default()
+        }
+    };
     let app = MapLoaderApp::with_pref(prefs);
 
     //Include the icon directly into the binary
@@ -86,7 +93,15 @@ impl MapLoaderApp {
             let custom_path = path.display().to_string();
             println!("Custom map folder replace {} with {}", self.pref.custom_path, custom_path);
             self.pref.custom_path = custom_path;
-            pref::save_pref(&self.pref);
+            let r= pref::save_pref(&self.pref);
+            match r {
+                Ok(()) => println!("Custom folder set to {}", &self.pref.custom_path ),
+                Err(e) => {
+                    self.dialog.title = String::from(TITLE_ERROR);
+                    self.dialog.msg = e.to_string();
+                    self.dialog.show = true;
+                }
+            }
         }
     }
 
@@ -96,7 +111,15 @@ impl MapLoaderApp {
             let game_path = path.display().to_string();
             println!("Game folder replace {} with {}", self.pref.game_path, game_path);
             self.pref.game_path = game_path;
-            pref::save_pref(&self.pref);
+            let r= pref::save_pref(&self.pref);
+            match r {
+                Ok(()) => println!("Game folder set to {}", &self.pref.game_path),
+                Err(e) => {
+                    self.dialog.title = String::from(TITLE_ERROR);
+                    self.dialog.msg = e.to_string();
+                    self.dialog.show = true;
+                }
+            }
         }
     }
 
@@ -146,7 +169,7 @@ impl MapLoaderApp {
                 {
                     ui.ctx().set_visuals(egui::Visuals::light());
                     self.pref.dark_mode = false;
-                    pref::save_pref(&self.pref);
+                    pref::save_pref(&self.pref).ok();
                 }
             }
             false => {
@@ -156,7 +179,7 @@ impl MapLoaderApp {
                 {
                     ui.ctx().set_visuals(egui::Visuals::dark());
                     self.pref.dark_mode = true;
-                    pref::save_pref(&self.pref);
+                    pref::save_pref(&self.pref).ok();
                 }
             }
         }
@@ -207,7 +230,7 @@ impl MapLoaderApp {
                                             let msg = format!("\"{}\" successfully loaded", m.name);
                                             self.dialog.msg = String::from(msg);
                                             self.pref.last_loaded_map = m.name.clone();
-                                            pref::save_pref(&self.pref);
+                                            pref::save_pref(&self.pref).ok();
                                         }
                                         Err(e) => {
                                             self.dialog.title = String::from(TITLE_ERROR);
@@ -299,7 +322,7 @@ impl eframe::App for MapLoaderApp {
                                         self.dialog.title = String::from(TITLE_SUCCESS);
                                         self.dialog.msg = String::from("Original map sucessfully restored");
                                         self.pref.last_loaded_map = String::from("");
-                                        pref::save_pref(&self.pref);
+                                        pref::save_pref(&self.pref).ok();
                                     }
                                     Err(e) => {
                                         self.dialog.title = String::from(TITLE_ERROR);
