@@ -104,9 +104,20 @@ impl MapLoaderApp {
         let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
         let extensions: Vec<&str> = vec!("zip");
         if let Some(path) = rfd::FileDialog::new().set_directory(&path).add_filter("Zip files", &extensions).pick_file() {
-            unzip(path.as_path(), &self.pref.custom_path);
-            let zip_path = path.display().to_string();
-            println!("Chosen zip file : {}", zip_path);
+            let r = unzip(path.as_path(), &self.pref.custom_path);
+            let zip_path = path.file_name().and_then(|s| s.to_str()).unwrap_or("UNDEFINED");
+            match r {
+                Ok(()) => {
+                    self.dialog.title = String::from(TITLE_SUCCESS);
+                    let msg = format!("File \"{}\" successfully imported", zip_path);
+                    self.dialog.msg = String::from(msg);
+                }
+                Err(e) => {
+                    self.dialog.title = String::from(TITLE_ERROR);
+                    self.dialog.msg = e.to_string();
+                }
+            }
+            self.dialog.show = true;
         }
     }
 

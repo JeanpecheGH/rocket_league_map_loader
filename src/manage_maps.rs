@@ -56,41 +56,34 @@ fn backup_file_exists(game_folder: &str) -> bool {
     Path::new(&file_path).is_file()
 }
 
-pub fn unzip(zip_path: &Path, custom_folder: &str) {
+pub fn unzip(zip_path: &Path, custom_folder: &str) -> Result<(), io::Error> {
     //Example from zip-rs : https://github.com/zip-rs/zip/blob/master/examples/extract.rs
-    let file = fs::File::open(zip_path).unwrap();
+    let file = fs::File::open(zip_path)?;
 
-    let mut archive = zip::ZipArchive::new(file).unwrap();
+    let mut archive = zip::ZipArchive::new(file)?;
 
     for i in 0..archive.len() {
-        let mut file = archive.by_index(i).unwrap();
+        let mut file = archive.by_index(i)?;
         let outpath = match file.enclosed_name() {
             Some(path) => {
-                let dirs = path.parent().unwrap();
-                let dir_str = dirs.as_os_str().to_str().unwrap();
-                let sub_dir = match dir_str.len() {
-                    0 => {
+                let dirs = path.parent().and_then(|d| d.as_os_str().to_str());
+                let sub_dir = match dirs {
+                    Some(s) if s.len() == 0 => {
                         let no_ext_path = zip_path.with_extension("");
                         let short_path = no_ext_path.file_name();
-                        short_path.map(|f| f.to_str().unwrap()).unwrap().to_owned()
+                        short_path.and_then(|f| f.to_str()).unwrap_or("").to_owned()
                     },
-                    _ => String::from(dir_str)
+                    Some(s) => String::from(s),
+                    None => String::from("")
                 };
                 Path::new(custom_folder).join(sub_dir).join(path.file_name().unwrap())
             },
             None => continue,
         };
 
-        {
-            let comment = file.comment();
-            if !comment.is_empty() {
-                println!("File {} comment: {}", i, comment);
-            }
-        }
-
         if (*file.name()).ends_with('/') {
             println!("File {} extracted to \"{}\"", i, outpath.display());
-            fs::create_dir_all(&outpath).unwrap();
+            fs::create_dir_all(&outpath)?;
         } else {
             println!(
                 "File {} extracted to \"{}\" ({} bytes)",
@@ -100,12 +93,13 @@ pub fn unzip(zip_path: &Path, custom_folder: &str) {
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p).unwrap();
+                    fs::create_dir_all(&p)?;
                 }
             }
-            let mut outfile = fs::File::create(&outpath).unwrap();
-            io::copy(&mut file, &mut outfile).unwrap();
+            let mut outfile = fs::File::create(&outpath)?;
+            io::copy(&mut file, &mut outfile)?;
         }
     }
+    Ok(())
 }
 
