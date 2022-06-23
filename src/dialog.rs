@@ -1,8 +1,7 @@
-
 pub struct Dialog {
     pub show: bool,
     pub title: String,
-    pub msg: String
+    pub msg: String,
 }
 
 impl Default for Dialog {
@@ -10,7 +9,7 @@ impl Default for Dialog {
         Self {
             show: false,
             title: String::from(""),
-            msg: String::from("")
+            msg: String::from(""),
         }
     }
 }

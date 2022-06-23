@@ -2,7 +2,6 @@ const GAME_MAP_FOLDER: &str = "\\TAGame\\CookedPCConsole";
 const ORIGINAL_FILE: &str = "Labs_Underpass_P.upk";
 const BACKUP_FILE: &str = "BACKUP_FILE.upk";
 
-
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -72,12 +71,14 @@ pub fn unzip(zip_path: &Path, custom_folder: &str) -> Result<(), io::Error> {
                         let no_ext_path = zip_path.with_extension("");
                         let short_path = no_ext_path.file_name();
                         short_path.and_then(|f| f.to_str()).unwrap_or("").to_owned()
-                    },
+                    }
                     Some(s) => String::from(s),
-                    None => String::from("")
+                    None => String::from(""),
                 };
-                Path::new(custom_folder).join(sub_dir).join(path.file_name().unwrap())
-            },
+                Path::new(custom_folder)
+                    .join(sub_dir)
+                    .join(path.file_name().unwrap())
+            }
             None => continue,
         };
 
@@ -102,4 +103,3 @@ pub fn unzip(zip_path: &Path, custom_folder: &str) -> Result<(), io::Error> {
     }
     Ok(())
 }
-

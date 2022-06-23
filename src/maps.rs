@@ -5,7 +5,7 @@ use std::fs;
 pub struct Map {
     pub name: String,
     pub author: Option<String>,
-    pub path: String
+    pub path: String,
 }
 
 impl Default for Map {
@@ -13,7 +13,7 @@ impl Default for Map {
         Self {
             name: String::from(""),
             author: None,
-            path: String::from("")
+            path: String::from(""),
         }
     }
 }
@@ -49,16 +49,20 @@ fn get_map(path: &str) -> Option<Map> {
         if md.is_file() {
             match file_name {
                 f if f.ends_with(".udk") => opt_path = Some(file_name.to_string()),
-                f if f.ends_with(".vdf") => (),//Do nothing for now
+                f if f.ends_with(".vdf") => (), //Do nothing for now
                 f if f.ends_with(".json") => {
                     opt_author = parse_json(f);
                     ()
-                },//Get map name and author from json
-                _ => ()
+                } //Get map name and author from json
+                _ => (),
             }
         }
     }
-    let opt_map = opt_path.map(|p| Map { name: opt_name.unwrap_or("".to_string()), author: opt_author, path: p});
+    let opt_map = opt_path.map(|p| Map {
+        name: opt_name.unwrap_or("".to_string()),
+        author: opt_author,
+        path: p,
+    });
     opt_map
 }
 

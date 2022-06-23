@@ -1,34 +1,55 @@
 extern crate preferences;
-use preferences::{AppInfo, PreferencesMap, Preferences};
+use preferences::{AppInfo, Preferences, PreferencesMap};
 
-const APP_INFO: AppInfo = AppInfo{name: "rocket league map loader", author: "Jeanpeche"};
+const APP_INFO: AppInfo = AppInfo {
+    name: "rocket league map loader",
+    author: "Jeanpeche",
+};
 const PREFS_KEY: &str = "conf";
 
 pub struct Pref {
     pub custom_path: String,
     pub game_path: String,
     pub last_loaded_map: String,
-    pub dark_mode: bool
+    pub dark_mode: bool,
 }
 
-pub fn load_pref() -> Result<Pref, preferences::PreferencesError>  {
+pub fn load_pref() -> Result<Pref, preferences::PreferencesError> {
     let pref_map = match PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY) {
         Ok(pref_map) => pref_map,
         Err(e) => {
-            println!("Unable to load existing preferences, initialize preferences : {}", e);
+            println!(
+                "Unable to load existing preferences, initialize preferences : {}",
+                e
+            );
             save_pref(&Pref::default())?;
             PreferencesMap::<String>::load(&APP_INFO, PREFS_KEY)?
         }
     };
     Ok(Pref {
-        custom_path:  pref_map.get("custom_path").map(|s| &s[..]).unwrap_or("").to_string(),
-        game_path: pref_map.get("game_path").map(|s| &s[..]).unwrap_or("").to_string(),
-        last_loaded_map: pref_map.get("last_loaded_map").map(|s| &s[..]).unwrap_or("").to_string(),
-        dark_mode: pref_map.get("dark_mode").map(|s| match s.as_str() {
-            "true" => true,
-            "false" => false,
-            _ => false
-        } ).unwrap_or(false)
+        custom_path: pref_map
+            .get("custom_path")
+            .map(|s| &s[..])
+            .unwrap_or("")
+            .to_string(),
+        game_path: pref_map
+            .get("game_path")
+            .map(|s| &s[..])
+            .unwrap_or("")
+            .to_string(),
+        last_loaded_map: pref_map
+            .get("last_loaded_map")
+            .map(|s| &s[..])
+            .unwrap_or("")
+            .to_string(),
+        dark_mode: pref_map
+            .get("dark_mode")
+            .map(|s| match s.as_str() {
+                "true" => true,
+                "false" => false,
+                _ => false,
+            })
+            .unwrap_or(false),
     })
 }
 
@@ -48,8 +69,7 @@ impl Default for Pref {
             custom_path: String::from(""),
             game_path: String::from(""),
             last_loaded_map: String::from(""),
-            dark_mode: false
+            dark_mode: false,
         }
     }
 }
-
