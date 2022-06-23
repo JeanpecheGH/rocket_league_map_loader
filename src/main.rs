@@ -8,6 +8,7 @@ mod dialog;
 use eframe::egui;
 use egui::{Id, Vec2};
 use egui_extras::{TableBody, TableBuilder, Size};
+use rfd::FileDialog;
 
 use crate::maps::Map;
 use crate::pref::Pref;
@@ -87,9 +88,18 @@ impl MapLoaderApp {
         });
     }
 
+    fn get_file_dialog() -> FileDialog {
+        let path = std::env::current_dir().ok()
+            .and_then(|d| d.to_str().map(|s| s.to_string()));
+        let dialog = match path {
+            Some(p) => FileDialog::new().set_directory(&p),
+            None => FileDialog::new()
+        };
+        dialog
+    }
+
     fn pick_custom_folder(&mut self) {
-        let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
-        if let Some(path) = rfd::FileDialog::new().set_directory(&path).pick_folder() {
+        if let Some(path) = Self::get_file_dialog().pick_folder() {
             let custom_path = path.display().to_string();
             println!("Custom map folder replace {} with {}", self.pref.custom_path, custom_path);
             self.pref.custom_path = custom_path;
@@ -106,8 +116,7 @@ impl MapLoaderApp {
     }
 
     fn pick_game_folder(&mut self) {
-        let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
-        if let Some(path) = rfd::FileDialog::new().set_directory(&path).pick_folder() {
+        if let Some(path) = Self::get_file_dialog().pick_folder() {
             let game_path = path.display().to_string();
             println!("Game folder replace {} with {}", self.pref.game_path, game_path);
             self.pref.game_path = game_path;
@@ -124,9 +133,8 @@ impl MapLoaderApp {
     }
 
     fn import_new_map(&mut self) {
-        let path = std::env::current_dir().unwrap().to_str().unwrap().to_string();
         let extensions: Vec<&str> = vec!("zip");
-        if let Some(path) = rfd::FileDialog::new().set_directory(&path).add_filter("Zip files", &extensions).pick_file() {
+        if let Some(path) = Self::get_file_dialog().add_filter("Zip files", &extensions).pick_file() {
             let r = unzip(path.as_path(), &self.pref.custom_path);
             let zip_path = path.file_name().and_then(|s| s.to_str()).unwrap_or("UNDEFINED");
             match r {
