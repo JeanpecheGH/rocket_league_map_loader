@@ -35,11 +35,19 @@ fn main() {
     };
     let app = MapLoaderApp::with_pref(prefs);
 
+    let mode = dark_light::detect();
+
     //Include the icon directly into the binary
     let icon_bytes = include_bytes!("..\\media\\icon-128.png");
-    let icon = image::load_from_memory(icon_bytes)
-        .expect("Failed to load icon data")
-        .to_rgba8();
+    let dark_icon_bytes = include_bytes!("..\\media\\dark-icon-128.png");
+    let icon = match mode {
+        dark_light::Mode::Light => image::load_from_memory(icon_bytes)
+            .expect("Failed to load icon data")
+            .to_rgba8(),
+        dark_light::Mode::Dark => image::load_from_memory(dark_icon_bytes)
+            .expect("Failed to load icon data")
+            .to_rgba8(),
+    };
     let (icon_width, icon_height) = icon.dimensions();
 
     let options = eframe::NativeOptions {

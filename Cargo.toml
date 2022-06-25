@@ -7,6 +7,7 @@ build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dark-light = "0.2.2"
 egui = "0.18.1"
 egui_extras = "0.18.0"
 eframe = { version = "0.18.0", features = ["persistence"] }
