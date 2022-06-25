@@ -93,6 +93,13 @@ impl MapLoaderApp {
         });
     }
 
+    fn open_folder(path: &str) {
+        std::process::Command::new("explorer")
+            .arg(path)
+            .spawn()
+            .unwrap();
+    }
+
     fn get_file_dialog() -> FileDialog {
         let path = std::env::current_dir()
             .ok()
@@ -181,6 +188,10 @@ impl MapLoaderApp {
         }
         if ui.button("Import new map").clicked() {
             self.import_new_map();
+            ui.close_menu();
+        }
+        if ui.button("Open custom folder").clicked() {
+            Self::open_folder(&self.pref.custom_path);
             ui.close_menu();
         }
     }
