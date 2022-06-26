@@ -17,10 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: cargo build --verbose --release
+      run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
-    - uses: actions/upload-artifact@v3
-      with:
-        name: RLMapLoader
-        path: D:\a\rocket_league_map_loader\rocket_league_map_loader\target\release\rocket_league_map_loader.exe
