@@ -39,7 +39,7 @@ fn get_map(path: &str) -> Option<Map> {
     let mut opt_path: Option<String> = None;
 
     //Get map name from folder name
-    let split = path.split("\\");
+    let split = path.split('\\');
     let opt_name: Option<String> = split.last().map(|s| s.to_string());
 
     for entry in fs::read_dir(path).ok()? {
@@ -50,26 +50,22 @@ fn get_map(path: &str) -> Option<Map> {
             match file_name {
                 f if f.ends_with(".udk") => opt_path = Some(file_name.to_string()),
                 f if f.ends_with(".vdf") => (), //Do nothing for now
-                f if f.ends_with(".json") => {
-                    opt_author = parse_json(f);
-                    ()
-                } //Get map name and author from json
+                f if f.ends_with(".json") => opt_author = parse_json(f), //Get map author from json
                 _ => (),
             }
         }
     }
-    let opt_map = opt_path.map(|p| Map {
-        name: opt_name.unwrap_or("".to_string()),
+    opt_path.map(|p| Map {
+        name: opt_name.unwrap_or_default(),
         author: opt_author,
         path: p,
-    });
-    opt_map
+    })
 }
 
 fn parse_json(path: &str) -> Option<String> {
     let data = fs::read_to_string(path).ok()?;
     let v: Value = serde_json::from_str(&data).ok()?;
     // Access parts of the data by indexing with square brackets.
-    let author = v["author"].as_str().map(|s| String::from(s));
+    let author = v["author"].as_str().map(String::from);
     author
 }

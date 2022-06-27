@@ -112,11 +112,10 @@ impl MapLoaderApp {
         let path = std::env::current_dir()
             .ok()
             .and_then(|d| d.to_str().map(|s| s.to_string()));
-        let dialog = match path {
+        match path {
             Some(p) => FileDialog::new().set_directory(&p),
             None => FileDialog::new(),
-        };
-        dialog
+        }
     }
 
     fn pick_custom_folder(&mut self) {
@@ -174,7 +173,7 @@ impl MapLoaderApp {
                 Ok(()) => {
                     self.dialog.title = String::from(TITLE_SUCCESS);
                     let msg = format!("File \"{}\" successfully imported", zip_path);
-                    self.dialog.msg = String::from(msg);
+                    self.dialog.msg = msg;
                 }
                 Err(e) => {
                     self.dialog.title = String::from(TITLE_ERROR);
@@ -269,28 +268,24 @@ impl MapLoaderApp {
                         ui.horizontal_centered(|ui| {
                             if m.name.eq(last_loaded_map.as_str()) {
                                 ui.label(egui::RichText::new("LOADED").strong());
-                            } else {
-                                if ui.button("LOAD").clicked() {
-                                    let r = manage_maps::load_custom_file(
-                                        &self.pref.game_path,
-                                        &m.path,
-                                    );
-                                    match r {
-                                        Ok(()) => {
-                                            self.dialog.title = String::from(TITLE_SUCCESS);
-                                            let msg = format!("\"{}\" successfully loaded", m.name);
-                                            self.dialog.msg = String::from(msg);
-                                            self.pref.last_loaded_map = m.name.clone();
-                                            pref::save_pref(&self.pref).ok();
-                                        }
-                                        Err(e) => {
-                                            self.dialog.title = String::from(TITLE_ERROR);
-                                            self.dialog.msg = e.to_string();
-                                        }
+                            } else if ui.button("LOAD").clicked() {
+                                let r =
+                                    manage_maps::load_custom_file(&self.pref.game_path, &m.path);
+                                match r {
+                                    Ok(()) => {
+                                        self.dialog.title = String::from(TITLE_SUCCESS);
+                                        let msg = format!("\"{}\" successfully loaded", m.name);
+                                        self.dialog.msg = msg;
+                                        self.pref.last_loaded_map = m.name.clone();
+                                        pref::save_pref(&self.pref).ok();
                                     }
-                                    self.dialog.show = true;
-                                };
-                            }
+                                    Err(e) => {
+                                        self.dialog.title = String::from(TITLE_ERROR);
+                                        self.dialog.msg = e.to_string();
+                                    }
+                                }
+                                self.dialog.show = true;
+                            };
                         });
                     });
                 });
@@ -300,7 +295,7 @@ impl MapLoaderApp {
 
     fn with_pref(pref: Pref) -> Self {
         Self {
-            pref: pref,
+            pref,
             search: String::from(""),
             maps: Vec::new(),
             dialog: Dialog::default(),
@@ -352,7 +347,7 @@ impl eframe::App for MapLoaderApp {
                 });
             } else {
                 //Only load maps now that we have set the custom path
-                let folder_maps = maps::get_maps(&self.pref.custom_path).unwrap_or(vec![]);
+                let folder_maps = maps::get_maps(&self.pref.custom_path).unwrap_or_default();
                 self.maps = folder_maps;
 
                 ////////////////////
@@ -367,24 +362,24 @@ impl eframe::App for MapLoaderApp {
                             egui::TextEdit::singleline(&mut self.search),
                         );
                         ui.label("Search: ");
-                        if !self.pref.last_loaded_map.eq("") {
-                            if ui.button("Restore original map").clicked() {
-                                let r = manage_maps::restore_original_file(&self.pref.game_path);
-                                match r {
-                                    Ok(()) => {
-                                        self.dialog.title = String::from(TITLE_SUCCESS);
-                                        self.dialog.msg =
-                                            String::from("Original map sucessfully restored");
-                                        self.pref.last_loaded_map = String::from("");
-                                        pref::save_pref(&self.pref).ok();
-                                    }
-                                    Err(e) => {
-                                        self.dialog.title = String::from(TITLE_ERROR);
-                                        self.dialog.msg = e.to_string();
-                                    }
+                        if !self.pref.last_loaded_map.eq("")
+                            && ui.button("Restore original map").clicked()
+                        {
+                            let r = manage_maps::restore_original_file(&self.pref.game_path);
+                            match r {
+                                Ok(()) => {
+                                    self.dialog.title = String::from(TITLE_SUCCESS);
+                                    self.dialog.msg =
+                                        String::from("Original map sucessfully restored");
+                                    self.pref.last_loaded_map = String::from("");
+                                    pref::save_pref(&self.pref).ok();
                                 }
-                                self.dialog.show = true;
+                                Err(e) => {
+                                    self.dialog.title = String::from(TITLE_ERROR);
+                                    self.dialog.msg = e.to_string();
+                                }
                             }
+                            self.dialog.show = true;
                         }
                     });
                 });
