@@ -29,27 +29,23 @@ pub fn load_pref() -> Result<Pref, preferences::PreferencesError> {
     Ok(Pref {
         custom_path: pref_map
             .get("custom_path")
-            .map(|s| &s[..])
-            .unwrap_or("")
+            .map_or("", |s| &s[..])
             .to_string(),
         game_path: pref_map
             .get("game_path")
-            .map(|s| &s[..])
-            .unwrap_or("")
+            .map_or("", |s| &s[..])
             .to_string(),
         last_loaded_map: pref_map
             .get("last_loaded_map")
-            .map(|s| &s[..])
-            .unwrap_or("")
+            .map_or("", |s| &s[..])
             .to_string(),
         dark_mode: pref_map
             .get("dark_mode")
-            .map(|s| match s.as_str() {
+            .map_or(false, |s| match s.as_str() {
                 "true" => true,
                 "false" => false,
                 _ => false,
-            })
-            .unwrap_or(false),
+            }),
     })
 }
 
