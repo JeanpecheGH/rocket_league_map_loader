@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Wokring directory
-      run: echo '${{ GITHUB_WORKSPACE }}'
+      run: echo '${{ env.GITHUB_WORKSPACE }}'
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
