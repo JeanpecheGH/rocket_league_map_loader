@@ -2,7 +2,7 @@
 Custom map manager for Rocket League
 
 ## Getting started
-To use this program, just download the [RLMapLoader.exe](/JeanpecheGH/rocket_league_map_loader/releases/latest/download/RLMapLoader.exe) file.  
+To use this program, just download the [RLMapLoader.exe](https://github.com/JeanpecheGH/rocket_league_map_loader/releases/latest/download/RLMapLoader.exe) file.  
 It's a simple binary that requires no installation.
 
 Then, you simply have to pick the folder where you will put your custom maps, and then the game folder to configure it.
