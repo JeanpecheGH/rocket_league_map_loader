@@ -1,5 +1,7 @@
 # Rocket League map loader
-Custom map manager for Rocket League
+Custom map manager for Rocket League.  
+
+
 ![plot](./media/appExample.png)
 
 ## Getting started
