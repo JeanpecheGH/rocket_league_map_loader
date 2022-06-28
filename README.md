@@ -14,5 +14,5 @@ Finally, you can load a map by using the LOAD button at the end of each line.
 The original "Labs_Underpass_P.upk" will be backed up and you can restore it by using the "Restore original map"
 
 ## Uninstalling
-As this is a simple binary, you just have to delete the .exe file
+As this is a simple binary, you just have to delete the .exe file.  
 The app preferences are stored in "C:\Users\MyUserName\AppData\Roaming\Jeanpeche\rocket league map loader" and you can delete this folder manually if you want to remove it entirely.
