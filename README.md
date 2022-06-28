@@ -15,7 +15,7 @@ The original "Labs_Underpass_P.upk" will be backed up and you can restore it by 
 
 ## Renaming a map
 The map name displayed in the app is based on the folder name containing the .upk file.  
-So you just have to rename this folder to change the map name.
+So you just have to rename this folder to change the map name.  
 You can access the custom folder easily by using the "Menu (☰) -> Open custom folder" button.
 
 ## Uninstalling
