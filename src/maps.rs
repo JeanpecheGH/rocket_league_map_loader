@@ -48,7 +48,7 @@ fn get_map(path: &str) -> Option<Map> {
         let md = fs::metadata(file_name).ok()?;
         if md.is_file() {
             match file_name {
-                f if f.ends_with(".udk") => opt_path = Some(file_name.to_string()),
+                f if f.ends_with(".udk") || f.ends_with(".upk") => opt_path = Some(file_name.to_string()),
                 f if f.ends_with(".vdf") => (), //Do nothing for now
                 f if f.ends_with(".json") => opt_author = parse_json(f), //Get map author from json
                 _ => (),
