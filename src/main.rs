@@ -41,7 +41,7 @@ fn main() {
     let icon_bytes = include_bytes!("..\\media\\icon-128.png");
     let dark_icon_bytes = include_bytes!("..\\media\\dark-icon-128.png");
     let icon = match mode {
-        dark_light::Mode::Light => image::load_from_memory(icon_bytes)
+        dark_light::Mode::Light | dark_light::Mode::Default => image::load_from_memory(icon_bytes)
             .expect("Failed to load icon data")
             .to_rgba8(),
         dark_light::Mode::Dark => image::load_from_memory(dark_icon_bytes)
