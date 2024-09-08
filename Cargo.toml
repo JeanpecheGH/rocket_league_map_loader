@@ -8,9 +8,9 @@ build = "build.rs"
 
 [dependencies]
 dark-light = "1.1.1"
-egui = "0.18.1"
-egui_extras = "0.18.0"
-eframe = { version = "0.18.0", features = ["persistence"] }
+egui = "0.28.1"
+egui_extras = "0.28.1"
+eframe = { version = "0.28.1", features = ["persistence"] }
 image = "0.25.2"
 preferences = "2.0.0"
 rfd = "0.14.1"

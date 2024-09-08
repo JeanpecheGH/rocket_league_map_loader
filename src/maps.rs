@@ -1,21 +1,11 @@
 use serde_json::Value;
 use std::fs;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Map {
     pub name: String,
     pub author: Option<String>,
     pub path: String,
-}
-
-impl Default for Map {
-    fn default() -> Self {
-        Self {
-            name: String::from(""),
-            author: None,
-            path: String::from(""),
-        }
-    }
 }
 
 pub fn get_maps(path: &str) -> Option<Vec<Map>> {
@@ -48,7 +38,9 @@ fn get_map(path: &str) -> Option<Map> {
         let md = fs::metadata(file_name).ok()?;
         if md.is_file() {
             match file_name {
-                f if f.ends_with(".udk") || f.ends_with(".upk") => opt_path = Some(file_name.to_string()),
+                f if f.ends_with(".udk") || f.ends_with(".upk") => {
+                    opt_path = Some(file_name.to_string())
+                }
                 f if f.ends_with(".vdf") => (), //Do nothing for now
                 f if f.ends_with(".json") => opt_author = parse_json(f), //Get map author from json
                 _ => (),

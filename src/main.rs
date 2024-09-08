@@ -5,10 +5,11 @@ mod manage_maps;
 mod maps;
 mod pref;
 
-use eframe::egui;
-use egui::{Id, Vec2};
-use egui_extras::{Size, TableBody, TableBuilder};
+use eframe::{egui, NativeOptions};
+use egui::{Align, IconData, Id, Vec2, ViewportBuilder};
+use egui_extras::{Column, TableBody, TableBuilder};
 use rfd::FileDialog;
+use std::sync::Arc;
 
 use crate::dialog::Dialog;
 use crate::manage_maps::unzip;
@@ -24,15 +25,11 @@ const VEC2_SIZE: Vec2 = Vec2 {
 const TITLE_SUCCESS: &str = "✅ Success";
 const TITLE_ERROR: &str = "⚠ Error";
 
-fn main() {
-    let r = pref::load_pref();
-    let prefs = match r {
-        Ok(pref) => pref,
-        Err(e) => {
-            eprintln!("Error loading preferences : {}", e);
-            Pref::default()
-        }
-    };
+fn main() -> eframe::Result {
+    let prefs = pref::load_pref().unwrap_or_else(|e| {
+        eprintln!("Error loading preferences : {}", e);
+        Pref::default()
+    });
     let app = MapLoaderApp::with_pref(prefs);
 
     let mode = dark_light::detect();
@@ -50,40 +47,33 @@ fn main() {
     };
     let (icon_width, icon_height) = icon.dimensions();
 
-    let options = eframe::NativeOptions {
-        resizable: true,
-        min_window_size: Some(VEC2_SIZE),
-        initial_window_size: Some(VEC2_SIZE),
-        icon_data: Some(eframe::IconData {
+    let viewport = ViewportBuilder::default()
+        .with_inner_size(VEC2_SIZE)
+        .with_min_inner_size(VEC2_SIZE)
+        .with_icon(Arc::new(IconData {
             rgba: icon.into_raw(),
             width: icon_width,
             height: icon_height,
-        }),
-        ..eframe::NativeOptions::default()
+        }));
+
+    let options = NativeOptions {
+        viewport,
+        follow_system_theme: true,
+        ..NativeOptions::default()
     };
     eframe::run_native(
         "Rocket League Map Loader",
         options,
-        Box::new(|_cc| Box::new(app)),
-    );
+        Box::new(|_cc| Ok(Box::new(app))),
+    )
 }
 
+#[derive(Default)]
 struct MapLoaderApp {
     pref: Pref,
     search: String,
     maps: Vec<Map>,
     dialog: Dialog,
-}
-
-impl Default for MapLoaderApp {
-    fn default() -> Self {
-        Self {
-            pref: Pref::default(),
-            search: String::from(""),
-            maps: vec![],
-            dialog: Dialog::default(),
-        }
-    }
 }
 
 impl MapLoaderApp {
@@ -309,15 +299,16 @@ impl eframe::App for MapLoaderApp {
         self.render_dialog(ctx);
 
         //Set theme based on preferences
-        let pref_dark_mode = self.pref.dark_mode;
-        match pref_dark_mode {
+        match self.pref.dark_mode {
             true => ctx.set_visuals(egui::Visuals::dark()),
             false => ctx.set_visuals(egui::Visuals::light()),
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            //When showing a dialog, the whole UI underneath is disabled
-            ui.set_enabled(!self.dialog.show);
+            //When showing a dialog, disable the whole UI underneath
+            if self.dialog.show {
+                ui.disable();
+            }
 
             if self.pref.custom_path.is_empty() {
                 ui.vertical_centered(|ui| {
@@ -356,7 +347,7 @@ impl eframe::App for MapLoaderApp {
                 ui.horizontal(|ui| {
                     ui.menu_button("☰", |ui| Self::nested_menus(self, ui));
                     Self::pick_theme(self, ui);
-                    ui.with_layout(egui::Layout::right_to_left(), |ui| {
+                    ui.with_layout(egui::Layout::right_to_left(Align::default()), |ui| {
                         ui.add_sized(
                             Vec2::new(100.0, ui.available_height()),
                             egui::TextEdit::singleline(&mut self.search),
@@ -386,9 +377,11 @@ impl eframe::App for MapLoaderApp {
                 ui.separator();
                 TableBuilder::new(ui)
                     .striped(true)
-                    .column(Size::remainder().at_least(100.0))
-                    .column(Size::relative(0.35).at_least(100.0))
-                    .column(Size::exact(60.0))
+                    .column(Column::remainder().at_least(100.0))
+                    .column(Column::auto().at_least(100.0))
+                    .column(Column::exact(60.0))
+                    //Without this, end of line start disappearing to right when resizing (default top_down is wrong)
+                    .cell_layout(egui::Layout::left_to_right(Align::Center))
                     .header(30.0, |mut header| {
                         header.col(|ui| {
                             ui.heading("Title");

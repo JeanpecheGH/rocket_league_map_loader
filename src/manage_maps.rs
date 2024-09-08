@@ -32,7 +32,7 @@ pub fn restore_original_file(game_folder: &str) -> Result<(), io::Error> {
 }
 
 fn copy_file(from: &str, to: &str) -> Result<(), io::Error> {
-    let r = fs::copy(&from, &to);
+    let r = fs::copy(from, to);
     match r {
         Ok(_) => Ok(()),
         Err(e) => {
@@ -66,7 +66,7 @@ pub fn unzip(zip_path: &Path, custom_folder: &str) -> Result<(), io::Error> {
             Some(path) => {
                 let dirs = path.parent().and_then(|d| d.as_os_str().to_str());
                 let sub_dir = match dirs {
-                    Some(s) if s.is_empty() => {
+                    Some("") => {
                         let no_ext_path = zip_path.with_extension("");
                         let short_path = no_ext_path.file_name();
                         short_path.and_then(|f| f.to_str()).unwrap_or("").to_owned()
@@ -93,7 +93,7 @@ pub fn unzip(zip_path: &Path, custom_folder: &str) -> Result<(), io::Error> {
             );
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p)?;
+                    fs::create_dir_all(p)?;
                 }
             }
             let mut outfile = fs::File::create(&outpath)?;
