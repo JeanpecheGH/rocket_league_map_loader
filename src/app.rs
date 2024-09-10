@@ -134,8 +134,7 @@ impl MapLoaderApp {
     }
 
     fn pick_theme(&mut self, ui: &mut egui::Ui) {
-        let style = (*ui.ctx().style()).clone();
-        match style.visuals.dark_mode {
+        match ui.ctx().style().visuals.dark_mode {
             true => {
                 if ui
                     .add(egui::Button::new("☀").frame(false))
